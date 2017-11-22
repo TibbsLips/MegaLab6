@@ -3,13 +3,15 @@ input clk,start,clk1hz;
 input [1:0] mode;
 output reg pulse;
 reg pulsecontrol;
-reg [21:0]counter;  //used to count for "pulse clocks"
-reg [21:0]pulsevalue;
+reg hybridtimer;
+reg [22:0]counter;  //used to count for "pulse clocks"
+reg [22:0]pulsevalue;
 
 initial begin
-pulse<=0;            //pulse when 1
-pulsevalue<=0;
-counter<=0;
+hybridtimer<=0;     //hybrid timer is used to increment the hybrid mode step count based on the time 
+pulse<=0;           //pulse when 1
+pulsevalue<=23'b00000000000000000000000;
+counter<=23'b00000000000000000000000;
 pulsecontrol<=0;    //when pulsecontrol is 0, we will not use the "clock" always block to generate pulses 
 end
 
@@ -26,26 +28,79 @@ if(start==1)
       case(mode)
       2'b00: begin
                 pulsecontrol<=1;
-                pulsevalue<=22'b0101111101011110000100; //walk: counter=1,562,500
+                pulsevalue<=23'b00101111101011110000100; //walk: counter=1,562,500    32 pulses per second
              end
       2'b01: begin
                 pulsecontrol<=1;
-                pulsevalue<=22'b0010111110101111000010; //jog:  counter=  781,250
+                pulsevalue<=23'b00010111110101111000010; //jog:  counter=  781,250    64 pulses per second
              end
       2'b10: begin
                 pulsecontrol<=1;
-                pulsevalue<=22'b0001011111010111100001; //run:  counter=  390,625
+                pulsevalue<=23'b00001011111010111100001; //run:  counter=  390,625    128 pulses per second
              end
       2'b11: begin
-                pulsecontrol<=1;
-                //pulsevalue<=22'b  This needs to vary based on what time it is
+                if(hybridtimer==1)                                    //20 pulses per second: counter=2,500,000
+                    begin
+                        pulsecontrol<=1;
+                        pulsevalue<=23'b01001100010010110100000;
+                    end
+                else if((hybridtimer==2)||(hybridtimer==9))           //33 pulses per second: counter=1,515,151
+                    begin
+                        pulsecontrol<=1;
+                        pulsevalue<=23'b00101110001111010001111;
+                    end
+                else if(hybridtimer==3)                               //66 pulses per second: counter=757,575
+                    begin
+                        pulsecontrol<=1;
+                        pulsevalue<=23'b00010111000111101000111;
+                    end
+                else if(hybridtimer==4)                               //27 pulses per second: counter=1,851,851
+                    begin
+                        pulsecontrol<=1;
+                        pulsevalue<=23'b00111000100000111001011;
+                    end
+                else if(hybridtimer==5)                               //70 pulses per second: counter=714,285
+                    begin
+                        pulsecontrol<=1;
+                        pulsevalue<=23'b00010101110011000101101;
+                    end
+                else if((hybridtimer==6)||(hybridtimer==8))           //30 pulses per second: counter=1,666,666
+                    begin
+                        pulsecontrol<=1;
+                        pulsevalue<=23'b00110010110111001101010;
+                    end
+                else if (hybridtimer==7)                              //19 pulses per second: counter=2,631,578
+                    begin
+                        pulsecontrol<=1;
+                        pulsevalue<=23'b01010000010011110011010;
+                    end
+                else if((hybridtimer>=10)&&(hybridtimer<=73))         //69 pulses per second: counter=724,637
+                    begin
+                        pulsecontrol<=1;
+                        pulsevalue<=23'b00010110000111010011101;
+                    end
+                else if((hybridtimer>=74)&&(hybridtimer<=79))         //34 pulses per second: counter=1,470,588
+                    begin
+                        pulsecontrol<=1;
+                        pulsevalue<=23'b00101100111000001111100;
+                    end
+                else if((hybridtimer>=80)&&(hybridtimer<=144))        //124 pulses per second: counter=403,225
+                    begin
+                        pulsecontrol<=1;
+                        pulsevalue<=23'b00001100010011100011001;
+                    end
+                else 
+                    begin
+                        pulsecontrol<=0;
+                        pulsevalue<=23'b00000000000000000000000;
+                    end
              end
        endcase
     end
 else
   begin
    pulsecontrol<=0;
-   pulsevalue=22'b0000000000000000000000;
+   pulsevalue=23'b00000000000000000000000;
   end
 end
 
@@ -57,7 +112,7 @@ begin
 if(pulsecontrol==0)
     begin
         pulse<=0;
-        counter<=0;
+        counter<=23'b00000000000000000000000;
     end
 else
     begin
@@ -77,7 +132,7 @@ else
         else
         begin
             pulse=pulse;
-            counter<=0;                   //we will reset counter if it is out of bounds or one pulse "clock" cycle
+            counter<=23'b00000000000000000000000;  //we will reset counter if it is out of bounds or one pulse "clock" cycle
         end
     end
 

@@ -65,8 +65,8 @@ if(secondsflag==0)
         totalsteps=totalsteps+1;          //increase totalsteps with each pulse
         tempsteps<=tempsteps+1;           //possible race condition with one second clock above
         pulsepersecond<=0;
-    end
-else 
+    end                                        ///////////////////////*********************************************/88888888888888888
+else                                        //CAPS/////could do the entire above always block inside of this else statement!!!!!!!!!!!!!!!!!!
     begin
         pulsepersecond<=tempsteps;
         totalsteps=totalsteps;

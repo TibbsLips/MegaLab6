@@ -1,4 +1,4 @@
-module pulsegen(clk,start,mode,pulse);
+module pulsegen(clk,start,mode,pulse,pulsestart);
 input clk,start;
 input [1:0] mode;
 output reg pulse;
@@ -9,6 +9,8 @@ reg [22:0]pulsevalue;       //loads the value that the counter will count to bef
 reg [27:0]secclk;           //used to act as a clock divider to increment seconds
 reg hybridlock;             //this will lock the timer for hybrid and will reset the timer (to increment through step numbers)
                             //hybridlock=0: do not use the timer, no hybrid mode     hybrid lock=1:use the hybrid timer
+output reg pulsestart;
+  
 initial begin
 secclk<=28'b0000000000000000000000000000;
 hybridlock<=0;
@@ -17,6 +19,7 @@ pulse<=0;                   //pulse when 1
 pulsevalue<=23'b00000000000000000000000;
 counter<=23'b00000000000000000000000;
 pulsecontrol<=0;            //when pulsecontrol is 0, we will not use the "clock" always block to generate pulses 
+pulsestart<=1;
 end
 
 //Always block will determine the activity mode 00= walk, 01=jog, 10=run, 11=hybrid
@@ -30,6 +33,7 @@ always@(start,hybridtimer)                               //needs to turn on with
 begin
 if(start==1)
     begin
+      pulsestart<=1;
       case(mode)
       2'b00: begin
                 hybridlock<=0;

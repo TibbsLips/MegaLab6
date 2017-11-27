@@ -9,7 +9,7 @@ reg [22:0]pulsevalue;       //loads the value that the counter will count to bef
 reg [27:0]secclk;           //used to act as a clock divider to increment seconds
 reg hybridlock;             //this will lock the timer for hybrid and will reset the timer (to increment through step numbers)
                             //hybridlock=0: do not use the timer, no hybrid mode     hybrid lock=1:use the hybrid timer
-output reg pulsestart;
+output reg pulsestart;      //This will be used in fitbit to begin the seconds counter
   
 initial begin
 secclk<=28'b0000000000000000000000000000;
